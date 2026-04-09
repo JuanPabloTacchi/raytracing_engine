@@ -1,0 +1,7 @@
+#pragma once
+
+typedef struct 
+{
+    /* data */
+    float3 n; // normal creo que no usare esto hasta mas adelante xd
+} Normal;

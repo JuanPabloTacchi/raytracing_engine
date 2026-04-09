@@ -1,0 +1,12 @@
+#pragma once
+
+//simple monte carlo sampling
+void MontecarloSampling(int n_samples){
+
+    for(int i = 0; i++; i < n_samples){
+        //aqui deberia llamarse la funcion de render
+    }
+
+    return;
+
+}

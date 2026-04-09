@@ -1,0 +1,169 @@
+#pragma once
+
+#include "ray.clh"
+#include "triangles.clh"
+#include "HittableObj.clh"
+#include "object.clh"
+#include "bsdf.clh"
+#include "random.clh"
+
+
+
+int max_bounce = 3;
+int bsdf_samples = 1;
+
+
+//un objeto esta compuesto de multiples triangulos
+//Object objects[];
+
+//array con todos los triangulos
+//Triangle triangles[];
+
+//ineficiencia hay que refactorizar
+//TODO
+bool getfirtsHit(Object* o, Triangle* triangle, float3* point, Ray r, int object_count, __global Object* objects, __global int* triangles, __global float4* points){
+    int infinity_value = 1000000;
+    float t = infinity_value;
+    //recursion for checking which object is first hitted
+    for(int i = 0; i < object_count ; i++ ){
+        //Object o = objects[i];
+        //*o = objects[i];
+        Object o_i = objects[i];
+        int n_triangles = o_i.n_triangles;
+        for(int j = 0;  j < n_triangles; j++){
+            Triangle new_triangle;
+            int new_triangle_index =  triangles[o_i.i_0+j*3];
+            new_triangle.A = points[new_triangle_index+0].xyz;
+            new_triangle.B = points[new_triangle_index+1].xyz;
+            new_triangle.C = points[new_triangle_index+2].xyz;
+            float3 normal = triangle_get_normal(new_triangle);
+            float t_i = plane_triangle_intersect(r,new_triangle,normal);
+            
+            if (t_i > 0 && t_i < t){
+                //check if point is inside triangle if not its discarded
+                float3 point_in_triangle_plane = ray_col_point(r,t_i);
+                bool is_inside_variable = is_inside(point_in_triangle_plane,new_triangle,normal);
+                if(is_inside_variable){
+                    *o = objects[i];
+                    t = t_i;
+                    *triangle = new_triangle;
+                    *point = point_in_triangle_plane; 
+                }
+
+            }
+        }
+    }
+    if (t == infinity_value){
+        return false;
+    }
+    return true;
+
+}
+
+
+
+float3 Le(float3 p, int object_count){
+    return (float3)(1.0f, 0.0f, 0.0f);
+}
+
+
+
+float3 raytrace(Ray r, __global Object* objects,
+    int objects_count,
+    __global float4* points,
+    int points_count,
+    __global int* triangle_index,
+    int triangles_count,
+    uint seed){
+    
+    Object collision_obj;
+    Triangle collision_triangle;
+    float3 collision_point;
+   
+    float3 rgb; //ilumination
+    float3 L_w = (float3)(0,0,0);
+    float3 L_i = (float3)(0,0,0);
+    float3 L_i_recursive_multiplication = (float3)(1,1,1);
+    //as there cant be recursion in gpu we have to use a while loop
+    while(r.bounces < max_bounce){
+        
+        bool res = getfirtsHit(&collision_obj, &collision_triangle, &collision_point, r, objects_count, objects, triangle_index, points);
+        
+        if (res == false){
+            if (r.bounces == 0){
+                rgb = (float3)(0,0,0);
+                return rgb;
+            }
+            L_i = (float3)(0,0,0);
+            return rgb;
+            
+        }
+        float3 normal = triangle_get_normal(collision_triangle);
+        int material = collision_obj.hitObj.Material;
+        
+        if (res == true && r.bounces == 2){
+            int material_test = collision_obj.hitObj.Material;
+            if (material_test == DIFUSSE){
+                return (float3)(0,0,1);
+            }
+            
+        }
+        //power: energy of light in all directions
+        //irradiance: energy of light per area entering the area
+        //radiance: energy of light per area per all angles
+
+        //L_o: radiance at observation point (ray origin)
+        //L_i: radiance from incident point 
+
+        //only diffuse materials at the moment
+        if (material == DIFUSSE){
+
+            Ray new_ray;
+            new_ray.d = random_on_hemisphere(normal,seed);
+            new_ray.o = collision_point;
+            new_ray.bounces = r.bounces;
+            //new_ray.bounces = r.bounces + 1;
+            float wo = dot(normal, new_ray.d); 
+            float wi = dot(normal,r.d); 
+            //IDEA
+            //float3 radiance_o = Diffuse_BSDF(collision_point,wi,wo)*cos(wo-wi)*L_i;
+            //colored radiance or stratified per color spectrum (thats not true cause im using rgb no real spectrum but its just for now)
+            //float3 colored_radiance_o = radiance_o*(float3)(0,1,0); //all objects will be green for now
+
+            L_i_recursive_multiplication = Diffuse_BSDF(collision_point,wi,wo)*cos(wi);
+            
+            L_i_recursive_multiplication = L_i_recursive_multiplication*(float3)(0,1,0);
+            //L_i_recursive_multiplication = (float3)(1,1,1);
+            //rgb = colored_radiance_o;
+            //L_i = colored_radiance_o;
+            r = new_ray;
+
+        }
+
+        if (material == EMISSIVE){
+                
+            //L_w = (float3)(1,1,1);
+            //Rendering equation L_f = L_w + BSRD
+            L_i = (float3)(1,1,1); 
+            break;
+            //L_i = L_w;
+            
+        }
+
+
+        
+        r.bounces = r.bounces + 1;
+
+
+    }
+    
+    float3 radiance_o = L_i_recursive_multiplication * L_i;
+    rgb = radiance_o;
+
+    rgb = rgb/bsdf_samples;
+
+    //float3 ilumination = Le(collision_point,object_count) + L_w;
+
+    return rgb;
+}
+

@@ -1,0 +1,8 @@
+#pragma once
+#define PI 3.14159265359f
+
+
+float Diffuse_BSDF(float3 p,float w0, float wf){
+
+    return (0.8/PI);
+}

@@ -1,0 +1,57 @@
+#pragma once
+#include "ray.clh"
+
+typedef struct 
+{
+    /* data */
+    float3 A; // A point
+    float3 B; // B point
+    float3 C; // C point 
+    //all in ccw
+} Triangle;
+
+float3 triangle_get_normal(Triangle t){
+    float3 n = cross((t.B-t.A),(t.C-t.A));
+    n = normalize(n);
+    return n;    
+}
+
+//calculates intersection between plane and a ray
+// n normalized normal of the plame created by triangle t
+float plane_triangle_intersect(Ray r, Triangle T, float3 n){
+    //calculates equations of plane Ax+By+Cz=D because  n dot (x,y,z) = D
+    //so n dot (o+td) = D
+    // -> t = (D-n dot o)/(n dot d)
+    
+    if( fabs(dot(n, r.d)) < 1e-6f){
+        return -1;
+    }
+
+    //calculate D for equation 
+    float D = dot(n,T.A);
+
+    float t = (D - dot(n,r.o))/dot(n,r.d);
+
+    return t;
+}
+
+//check if the intersection of a ray is inside
+// P intersection
+// T triangle
+// n normal or triangle
+// u,v vectors from uv mapping of triangle
+//TODO creo que esto asume que el triangulo sea rectangulo
+bool is_inside(float3 P, Triangle T, float3 n){
+    float3 u = T.B-T.A;
+    float3 v = T.C-T.A; 
+    n = cross(u,v);
+    float3 p = P - T.A;
+    float3 w = n/dot(n,n);
+    float alpha = dot(w,cross(p,v));
+    float beta = dot(w,cross(u,p));
+    
+    if(alpha > 0 && beta > 0 && alpha + beta < 1){
+        return true;
+    }
+    return false;
+}

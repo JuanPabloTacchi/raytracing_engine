@@ -1,0 +1,13 @@
+#pragma once
+#include "HittableObj.clh"
+
+typedef struct 
+{
+    /* data */
+    int i_0; //initial triangle index
+    int i_f; //last triangle index
+    int n_triangles; //n of triangles of the object
+    HittableObj hitObj; //material info
+    
+} Object;
+

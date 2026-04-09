@@ -1,0 +1,34 @@
+#pragma once
+// Generador xorshift32
+uint xorshift32(uint *state)
+{
+    uint x = *state;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    *state = x;
+    return x;
+}
+
+// Devuelve float entre 0,1
+float random_uniform(uint *state)
+{
+    return (float)xorshift32(state) * (1.0f / 4294967296.0f);
+}
+
+float3 random_unit_vector(uint seed) {
+    float x = random_uniform(&seed);
+    float y = random_uniform(&seed);
+    float z = random_uniform(&seed);
+    float3 vec = (float3)(x, y, z);
+    vec = normalize(vec);
+    return vec;
+}
+
+float3 random_on_hemisphere(float3 normal, uint seed) {
+    float3 on_unit_sphere = random_unit_vector(seed);
+    if (dot(on_unit_sphere, normal) > 0.0) // In the same hemisphere as the normal
+        return on_unit_sphere;
+    else
+        return -on_unit_sphere;
+}

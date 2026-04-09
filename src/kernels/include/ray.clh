@@ -1,0 +1,14 @@
+#pragma once
+
+typedef struct 
+{
+    /* data */
+    float3 o; //origin
+    float3 d; // direction
+    int bounces;//amount of bounces it had
+} Ray;
+
+
+float3 ray_col_point(Ray r,float t){
+    return r.o + t*r.d; 
+}

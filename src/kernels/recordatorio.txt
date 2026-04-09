@@ -1,0 +1,25 @@
+float3 a = (float3)(1.0f, 2.0f, 3.0f);
+float3 b = (float3)(4.0f, 5.0f, 6.0f);
+
+float3 c = a + b;   // funciona
+Porque esos tipos ya vienen con operadores definidos por el lenguaje.
+
+
+float3
+ya tiene:
+
++
+
+-
+
+*
+
+/
+
+dot(a,b)
+
+cross(a,b)
+
+normalize(a)
+
+length(a)
