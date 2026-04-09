@@ -22,4 +22,4 @@ target_include_directories(Tests PUBLIC
     )
 
 include(GoogleTest)
-gtest_discover_tests(helpTests)
+gtest_discover_tests(Tests)

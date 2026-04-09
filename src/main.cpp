@@ -92,7 +92,7 @@ void loadScene()
     triangle_points.push_back(p6);
 
 
-    triangle_indexes.insert(triangle_indexes.end(), {1,2,3,4,5,6});
+    triangle_indexes.insert(triangle_indexes.end(), {0,1,2,3,4,5});
 
     Object o1;
     HittableObj ho1;

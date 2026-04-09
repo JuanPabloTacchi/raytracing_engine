@@ -19,6 +19,7 @@ find_package(glfw3 CONFIG REQUIRED)
 add_subdirectory(include)
 add_subdirectory(src)
 add_subdirectory(extern)
+add_subdirectory(test)
 
 
 
