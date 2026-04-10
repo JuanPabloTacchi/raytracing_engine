@@ -498,10 +498,10 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
         Movement(window);
         float random_value = dist(gen);
-        //std::cout << camera.getViewportCenter() << std::endl;
-        //std::cout << camera.getU() << std::endl;
-        //std::cout << camera.getV() << std::endl;
-        //std::cout << random_value << std::endl;
+        std::cout << camera.getViewportCenter() << std::endl;
+        std::cout << camera.getU() << std::endl;
+        std::cout << camera.getV() << std::endl;
+        std::cout << random_value << std::endl;
         //std::cout << camera.getV() << std::endl;
         updateCL(random_value);
         renderGL();

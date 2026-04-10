@@ -4,5 +4,5 @@
 
 float Diffuse_BSDF(float3 p,float w0, float wf){
 
-    return (0.8/PI);
+    return (0.5);
 }

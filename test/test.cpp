@@ -86,11 +86,28 @@ TEST_F(TestSuit, GetFirstHiT) { //Estos test de constructor tambien testean el o
 
     ASSERT_EQ(res2, true) << "getfirstHit didnt collided when it should, test 2";
     ASSERT_EQ(returned_point, expected_collision_point) << "getfirsthit is not returning the expected point";
+
+    Ray test_ray3;
+    test_ray3.bounces = 0;
+    Vec3 test_point3 = Vec3(-5.6, 0.5, 0.375);
+    test_ray3.o = test_point3;
+    test_ray3.d = Vec3(1,0,0);
+    Vec3 expected_collision_point2 = Vec3(5,0.5,0.375);
+    bool res3 = getfirtsHit(&returned_object, &returned_triangle, &returned_point, test_ray2, objects.size(), objects.data(), triangles.data(), points.data());
+    ASSERT_EQ(res3, true) << "getfirstHit didnt collided when it should, test 3";
+    ASSERT_EQ(returned_point, expected_collision_point) << "getfirsthit is not returning the expected point";
  
 
 }
 
+//(-6.4, 0.5, 0.375)
+//(0, 0, -0.00125)
+//(-0, -0.00125, -0)
+//305.08
 
+//(-5.6, 0.5, 0.375)
+//(0, 0, -0.00125)
+//(-0, -0.00125, -0)
 
 int main(int argc, char **argv) {
     

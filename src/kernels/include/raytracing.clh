@@ -123,14 +123,17 @@ float3 raytrace(Ray r, __global Object* objects,
             new_ray.o = collision_point;
             new_ray.bounces = r.bounces;
             //new_ray.bounces = r.bounces + 1;
-            float wo = dot(normal, new_ray.d); 
-            float wi = dot(normal,r.d); 
+            float cos_wo = dot(normal, new_ray.d); //angle beetween 2 vector, remember cos(o) = a*b/||a||||b|| (normal and new_ray.d are normalized)
+            float cos_wi = dot(normal,-r.d); 
+            
+            float wo = acos(cos_wo); //TODO check the domain with clamp
+            float wi = acos(cos_wi);
             //IDEA
-            //float3 radiance_o = Diffuse_BSDF(collision_point,wi,wo)*cos(wo-wi)*L_i;
+            //float3 radiance_o = Diffuse_BSDF(collision_point,wi,wo)*L_i; (remember the cosine(wo) is inside the diffuse bsdf)
             //colored radiance or stratified per color spectrum (thats not true cause im using rgb no real spectrum but its just for now)
             //float3 colored_radiance_o = radiance_o*(float3)(0,1,0); //all objects will be green for now
 
-            L_i_recursive_multiplication = Diffuse_BSDF(collision_point,wi,wo)*cos(wi);
+            L_i_recursive_multiplication = Diffuse_BSDF(collision_point,wi,wo);
             
             L_i_recursive_multiplication = L_i_recursive_multiplication*(float3)(0,1,0);
             //L_i_recursive_multiplication = (float3)(1,1,1);

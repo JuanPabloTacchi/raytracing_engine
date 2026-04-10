@@ -35,7 +35,7 @@ __kernel void main_kernel(
     float3 viewportCenter = _viewportCenter.xyz;
     float3 cameraCenter = _cameraCenter.xyz;
 
-
+    //time = 2;
     int x = get_global_id(0);
     int y = get_global_id(1);
 
@@ -61,7 +61,7 @@ __kernel void main_kernel(
 
     
 
-    int n_samples = 1;
+    int n_samples = 15;
     for(int i = 0; i < n_samples; i++){
         rgb = rgb + raytrace(r, objects, objects_count, points, points_count, triangle_index, triangles_count, seed);
 
