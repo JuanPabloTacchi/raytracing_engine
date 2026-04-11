@@ -101,14 +101,12 @@ __kernel void main_kernel(
     
 
     float3 rgb_for_rendering;
-    int n_samples = 1;
-    for(int i = 0; i < n_samples; i++){
-        rgb = rgb + raytrace(r, objects, objects_count, points, points_count, triangle_index, triangles_count, state);
-    }
-    rgb = rgb/(float)n_samples;
+    
+    rgb = raytrace(r, objects, objects_count, points, points_count, triangle_index, triangles_count, state);
+    
     //maybe i could see a way to use shared memory instead
     if(cumulative_time < max_samples){
-        rgb_for_rendering = (cumulative_samples[pixel_index] + rgb)/((float)(cumulative_time));
+        rgb_for_rendering = (cumulative_samples[pixel_index] + rgb)/(cumulative_time);
         cumulative_samples[pixel_index] = cumulative_samples[pixel_index] + rgb;
     }
     else{
@@ -119,7 +117,7 @@ __kernel void main_kernel(
     float4 color;
    
     color = (float4)(rgb_for_rendering, 1.0f); // negro
-
-    write_imagef(img, (int2)(x, y), color);
+    write_imagef(img, (int2)(width - 1 - x, height - 1 - y), color);
+    //write_imagef(img, (int2)(x, y), color);
 }
 

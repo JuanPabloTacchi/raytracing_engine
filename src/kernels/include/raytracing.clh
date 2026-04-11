@@ -34,7 +34,7 @@ bool getfirtsHit(Object* o, Triangle* triangle, float3* point, Ray r, int object
             
             float t_i = plane_triangle_intersect(r,new_triangle,normal);
             
-            if (t_i > 0 && t_i < t){
+            if (t_i > 0.0001 && t_i < t){
                 //check if point is inside triangle if not its discarded
                 float3 point_in_triangle_plane = ray_col_point(r,t_i);
                 bool is_inside_variable = is_inside(point_in_triangle_plane,new_triangle,normal);
@@ -145,7 +145,7 @@ float3 raytrace(Ray r, __global Object* objects,
         }
       
         if (material == EMISSIVE){
-            L_i = (float3)(1,1,1)*object_color_rgb; 
+            L_i = (float3)(10,10,10)*object_color_rgb; 
             break;
         }
         r.bounces = r.bounces + 1;
