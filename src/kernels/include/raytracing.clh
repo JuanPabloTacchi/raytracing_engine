@@ -9,7 +9,7 @@
 
 
 
-int max_bounce = 3;
+int max_bounce = 5;
 
 //TODO:
 //This is probably the least efficient thing to implement, i should probably try a bhv tree structure but works for now
@@ -145,7 +145,7 @@ float3 raytrace(Ray r, __global Object* objects,
         }
       
         if (material == EMISSIVE){
-            L_i = (float3)(1,1,1); 
+            L_i = (float3)(1,1,1)*object_color_rgb; 
             break;
         }
         r.bounces = r.bounces + 1;

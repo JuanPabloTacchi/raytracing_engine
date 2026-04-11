@@ -54,7 +54,10 @@ __kernel void main_kernel(
     float4 _v,
     float4 _d,
     float4 _viewportCenter,
-    float4 _cameraCenter
+    float4 _cameraCenter,
+    __global float3* cumulative_samples,
+    int cumulative_time,
+    int max_samples
 ) {
     //camera info
     float3 u = _u.xyz;
@@ -62,6 +65,7 @@ __kernel void main_kernel(
     float3 d = _d.xyz;
     float3 viewportCenter = _viewportCenter.xyz;
     float3 cameraCenter = _cameraCenter.xyz;
+
 
     //time = 2;
     int x = get_global_id(0);
@@ -76,7 +80,7 @@ __kernel void main_kernel(
     Ray r = getRay(o,o-cameraCenter);
 
 
-    int pixel_index = x +  y * height;
+    int pixel_index = x +  y * width;
     //uint seed = (uint)(pixel_index + time * 128);
     
 
@@ -96,17 +100,25 @@ __kernel void main_kernel(
 
     
 
-    int n_samples = 10;
+    float3 rgb_for_rendering;
+    int n_samples = 1;
     for(int i = 0; i < n_samples; i++){
         rgb = rgb + raytrace(r, objects, objects_count, points, points_count, triangle_index, triangles_count, state);
     }
     rgb = rgb/(float)n_samples;
+    //maybe i could see a way to use shared memory instead
+    if(cumulative_time < max_samples){
+        rgb_for_rendering = (cumulative_samples[pixel_index] + rgb)/((float)(cumulative_time));
+        cumulative_samples[pixel_index] = cumulative_samples[pixel_index] + rgb;
+    }
+    else{
+        rgb_for_rendering = cumulative_samples[pixel_index]/cumulative_time;
+    }
 
-    
     
     float4 color;
    
-    color = (float4)(rgb, 1.0f); // negro
+    color = (float4)(rgb_for_rendering, 1.0f); // negro
 
     write_imagef(img, (int2)(x, y), color);
 }

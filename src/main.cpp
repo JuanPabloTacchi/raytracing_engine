@@ -61,9 +61,14 @@ std::vector<cl_float4> triangle_points;
 std::vector<int> triangle_indexes;
 
 
-int WIDTH = 600;
-int HEIGHT = 800;
 
+int WIDTH = 1920;
+int HEIGHT = 1080;
+
+std::vector<cl_float3> cumulative_pixels(WIDTH * HEIGHT);
+bool moved = false;
+int max_samples = 200;
+int cumulated_time = 1;
 
 //---------------------------
 // IDEA
@@ -297,7 +302,7 @@ void loadScene()
     light.i_0 = 30;
     light.i_f = 35;
     hoLight.Material = EMISSIVE;
-    hoLight.rgb = {1,1,1};
+    hoLight.rgb = {1.0f, 0.95f, 0.8f};
     light.hitObj = hoLight;
 
     //small box
@@ -394,38 +399,47 @@ cl::Context CreateCLGLContext(cl::Device& outDevice) {
 
 void Movement(GLFWwindow* window){
     Vec3 newPos;
+    moved = false;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
         newPos = camera.getPosition() + camera.getDirection()*speed;
         camera.Move_Camera(newPos, camera.getDirection());
+        moved = true;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
         newPos = camera.getPosition() - camera.getDirection()*speed;
         camera.Move_Camera(newPos, camera.getDirection());
+        moved = true;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
         newPos = camera.getPosition() + camera.getLeft()*speed;
         camera.Move_Camera(newPos, camera.getDirection());
+        moved = true;
     }
 
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
         newPos = camera.getPosition() + camera.getRight()*speed;
         camera.Move_Camera(newPos, camera.getDirection());
+        moved = true;
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS){ //rotate left
         Vec3 newDir = (camera.getDirection() + camera.getLeft() * sinf(speed/2));
         camera.Move_Camera(camera.getPosition(), newDir);
+        moved = true;
     }
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS){ //rotate left
         Vec3 newDir = (camera.getDirection() + camera.getRight() * sinf(speed/2));
         camera.Move_Camera(camera.getPosition(), newDir);
+        moved = true;
     }
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){ //rotate left
         Vec3 newDir = (camera.getDirection() + camera.getUp() * sinf(speed/2));
         camera.Move_Camera(camera.getPosition(), newDir);
+        moved = true;
     }
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){ //rotate left
         Vec3 newDir = (camera.getDirection() + camera.getDown() * sinf(speed/2));
         camera.Move_Camera(camera.getPosition(), newDir);
+        moved = true;
     }
     //newPos = camera.getPosition() + Vec3(1,0,1);
     
@@ -442,6 +456,11 @@ void updateCL(uint32_t cpu_seed) {
         queue.enqueueAcquireGLObjects(&objs);
 
         cl::Kernel kernel(prog, "main_kernel");
+
+        if (moved){
+            std::fill(cumulative_pixels.begin(), cumulative_pixels.end(), cl_float3{0.0f, 0.0f, 0.0f});
+            cumulated_time = 1;
+        }
 
 
 
@@ -470,6 +489,13 @@ void updateCL(uint32_t cpu_seed) {
             triangle_indexes.data()
         );
 
+        cl::Buffer buffer_cumulative_pixels(
+            context,
+            CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
+            sizeof(cl_float3) * WIDTH * HEIGHT,
+            cumulative_pixels.data()
+        );
+
         kernel.setArg(0, clImage);
         kernel.setArg(1, WIDTH);
         kernel.setArg(2, HEIGHT);
@@ -485,6 +511,9 @@ void updateCL(uint32_t cpu_seed) {
         kernel.setArg(12, camera.getDirection().toCLF4());
         kernel.setArg(13, camera.getViewportCenter().toCLF4());
         kernel.setArg(14, camera.getPosition().toCLF4());
+        kernel.setArg(15, buffer_cumulative_pixels);
+        kernel.setArg(16, cumulated_time);
+        kernel.setArg(17, max_samples);
 
         queue.enqueueNDRangeKernel(
             kernel,
@@ -492,6 +521,12 @@ void updateCL(uint32_t cpu_seed) {
             cl::NDRange(WIDTH, HEIGHT),
             cl::NullRange
         );
+         //reads sample acummulation
+        queue.enqueueReadBuffer(buffer_cumulative_pixels,CL_TRUE, 0, sizeof(cl_float3)*WIDTH*HEIGHT, cumulative_pixels.data(), 0, NULL);
+        cumulated_time++;
+        if (cumulated_time > max_samples){
+            cumulated_time = max_samples;
+        }
 
         queue.enqueueReleaseGLObjects(&objs);
         queue.finish();
@@ -540,7 +575,7 @@ int main() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     //creates window of 800x600
-    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenCL + OpenGL + GLFW", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "OpenCL + OpenGL + GLFW", nullptr, nullptr);
     if (!window) {
         std::cerr << "Window creation failed\n";
         glfwTerminate();
@@ -716,11 +751,11 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
         Movement(window);
         uint32_t random_value = dis(gen);
-        std::cout << camera.getViewportCenter() << std::endl;
+        //std::cout << camera.getViewportCenter() << std::endl;
         //std::cout << camera.getU() << std::endl;
         //std::cout << camera.getV() << std::endl;
         //std::cout << random_value << std::endl;
-        std::cout << sizeof(cl_float3) << std::endl;
+        //std::cout << cumulated_time << std::endl;
         
         updateCL(random_value);
         renderGL();
