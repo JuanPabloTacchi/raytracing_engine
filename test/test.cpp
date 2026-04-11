@@ -1,3 +1,7 @@
+#define CL_HPP_ENABLE_EXCEPTIONS
+#define CL_HPP_TARGET_OPENCL_VERSION 200
+#define CL_HPP_MINIMUM_OPENCL_VERSION 120
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -96,6 +100,36 @@ TEST_F(TestSuit, GetFirstHiT) { //Estos test de constructor tambien testean el o
     bool res3 = getfirtsHit(&returned_object, &returned_triangle, &returned_point, test_ray2, objects.size(), objects.data(), triangles.data(), points.data());
     ASSERT_EQ(res3, true) << "getfirstHit didnt collided when it should, test 3";
     ASSERT_EQ(returned_point, expected_collision_point) << "getfirsthit is not returning the expected point";
+ 
+
+}
+
+TEST_F(TestSuit, triangle_get_normal) { //Estos test de constructor tambien testean el operador []
+    
+    Vec3 p0 = Vec3(10, 0, 0);
+    Vec3 p1 = Vec3(10, 0, 10);
+    Vec3 p2 = Vec3(10, 10, 10);
+
+    Triangle t;
+    t.A = p0;
+    t.B = p1;
+    t.C = p2;
+    Vec3 normal = triangle_get_normal(t);
+    Vec3 expected_normal = Vec3(-1,0,0);
+    ASSERT_EQ(normal, expected_normal) << "triangle_get_normal error";
+
+    Vec3 l0 = Vec3(3, 9.9, 3);
+    Vec3 l1 = Vec3(7, 9.9, 3);
+    Vec3 l2 = Vec3(7, 9.9, 7);
+
+    Triangle t2;
+    t2.A = l0;
+    t2.B = l1;
+    t2.C = l2;
+    Vec3 normal2 = triangle_get_normal(t2);
+    Vec3 expected_normal2 = Vec3(0,-1,0);
+    ASSERT_EQ(normal2, expected_normal2) << "triangle_get_normal error";
+
  
 
 }

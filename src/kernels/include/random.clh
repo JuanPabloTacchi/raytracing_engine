@@ -1,34 +1,34 @@
 #pragma once
-// Generador xorshift32
-uint xorshift32(uint *state)
-{
-    uint x = *state;
-    x ^= x << 13;
-    x ^= x >> 17;
-    x ^= x << 5;
-    *state = x;
-    return x;
+
+
+
+
+float quick_hash(uint2* state) {
+    state->x = state->x * 1664525u + 1013904223u;
+    return (float)(state->x & 0xFFFFFF) / 16777216.0f;
 }
 
-// Devuelve float entre 0,1
-float random_uniform(uint *state)
-{
-    return (float)xorshift32(state) * (1.0f / 4294967296.0f);
+
+
+float3 get_random_unit_vector(uint3* state) {
+    float3 v;
+    v.x = random_normal(state);
+    v.y = random_normal(state);
+    v.z = random_normal(state);   
+    
+    return normalize(v);
 }
 
-float3 random_unit_vector(uint seed) {
-    float x = random_uniform(&seed);
-    float y = random_uniform(&seed);
-    float z = random_uniform(&seed);
-    float3 vec = (float3)(x, y, z);
-    vec = normalize(vec);
-    return vec;
-}
 
-float3 random_on_hemisphere(float3 normal, uint seed) {
-    float3 on_unit_sphere = random_unit_vector(seed);
-    if (dot(on_unit_sphere, normal) > 0.0) // In the same hemisphere as the normal
-        return on_unit_sphere;
-    else
-        return -on_unit_sphere;
+float3 get_random_hemisphere(uint2* state, float3 normal) {
+    
+    float3 v;
+    v.x = quick_hash(state) * 2.0f - 1.0f;
+    v.y = quick_hash(state) * 2.0f - 1.0f;
+    v.z = quick_hash(state) * 2.0f - 1.0f;
+    v = normalize(v);
+    if (dot(v, normal) < 0.0f) {
+        v = -v;
+    }
+    return v;
 }

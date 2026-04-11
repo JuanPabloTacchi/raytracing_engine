@@ -74,7 +74,7 @@ int HEIGHT = 800;
 // -----------------------------------------
 
 
-void loadScene()
+void loadScenebeta()
 {
     //piso 
     cl_float4 p1 = {0, 0, 0, 0};
@@ -84,11 +84,11 @@ void loadScene()
     cl_float4 p3 = {0, 0, 15, 0};
     triangle_points.push_back(p3);
     //objeto
-    cl_float4 p4 = {5, 0, 0, 0};
+    cl_float4 p4 = {5, 5, 0, 0};
     triangle_points.push_back(p4);
-    cl_float4 p5 = {5, 0, 5, 0};
+    cl_float4 p5 = {5, 5, 5, 0};
     triangle_points.push_back(p5);
-    cl_float4 p6 = {5, 5, 0, 0};
+    cl_float4 p6 = {5, 10, 0, 0};
     triangle_points.push_back(p6);
 
 
@@ -97,6 +97,7 @@ void loadScene()
     Object o1;
     HittableObj ho1;
     ho1.Material = EMISSIVE;
+    ho1.rgb = {1,1,1};
     o1.hitObj = ho1;
     o1.n_triangles = 1;
     o1.i_0 = 0;
@@ -105,6 +106,7 @@ void loadScene()
     Object o2;
     HittableObj ho2;
     ho2.Material = DIFUSSE;
+    ho2.rgb = {0,1,0};
     o2.n_triangles = 1;
     o2.hitObj = ho2;
     o2.i_0 = 3;
@@ -112,6 +114,222 @@ void loadScene()
 
     objects.push_back(o1);
     objects.push_back(o2);
+    return;
+}
+
+
+void loadScene()
+{
+    // ======== Points ========
+
+    // floor
+    cl_float4 p0 = {0, 0, 0, 0};
+    cl_float4 p1 = {10, 0, 0, 0};
+    cl_float4 p2 = {10, 0, 10, 0};
+    cl_float4 p3 = {0, 0, 10, 0};
+
+    // ceil
+    cl_float4 p4 = {0, 10, 0, 0};
+    cl_float4 p5 = {10, 10, 0, 0};
+    cl_float4 p6 = {10, 10, 10, 0};
+    cl_float4 p7 = {0, 10, 10, 0};
+
+    // light 
+    cl_float4 l0 = {3, 9.9, 3, 0};
+    cl_float4 l1 = {7, 9.9, 3, 0};
+    cl_float4 l2 = {7, 9.9, 7, 0};
+    cl_float4 l3 = {3, 9.9, 7, 0};
+
+    
+    triangle_points.insert(triangle_points.end(), {
+        p0,p1,p2,p3,
+        p4,p5,p6,p7,
+        l0,l1,l2,l3
+    });
+
+    // ===== small box =====
+    cl_float4 b0 = {2,0,6,0};
+    cl_float4 b1 = {4,0,6,0};
+    cl_float4 b2 = {4,0,8,0};
+    cl_float4 b3 = {2,0,8,0};
+
+    cl_float4 b4 = {2,3,6,0};
+    cl_float4 b5 = {4,3,6,0};
+    cl_float4 b6 = {4,3,8,0};
+    cl_float4 b7 = {2,3,8,0};
+
+    // ===== big box =====
+    cl_float4 t0 = {6,0,2,0};
+    cl_float4 t1 = {8,0,2,0};
+    cl_float4 t2 = {8,0,5,0};
+    cl_float4 t3 = {6,0,5,0};
+
+    cl_float4 t4 = {6,7,2,0};
+    cl_float4 t5 = {8,7,2,0};
+    cl_float4 t6 = {8,7,5,0};
+    cl_float4 t7 = {6,7,5,0};
+
+    triangle_points.insert(triangle_points.end(), {
+        b0,b1,b2,b3,b4,b5,b6,b7,
+        t0,t1,t2,t3,t4,t5,t6,t7
+    });
+
+    // ======== triangles ========
+
+    // floor
+    triangle_indexes.insert(triangle_indexes.end(), {0,2,1, 0,3,2});
+
+    // ceiling
+    triangle_indexes.insert(triangle_indexes.end(), {4,5,6});
+    triangle_indexes.insert(triangle_indexes.end(), {4,6,7});
+
+    // back wall 
+    triangle_indexes.insert(triangle_indexes.end(), {3,6,2});
+    triangle_indexes.insert(triangle_indexes.end(), {3,7,6});
+
+    // left wall (red one)
+    triangle_indexes.insert(triangle_indexes.end(), {0,7,3});
+    triangle_indexes.insert(triangle_indexes.end(), {0,4,7});
+
+    // right wall (green one)
+    triangle_indexes.insert(triangle_indexes.end(), {1,2,6});
+    triangle_indexes.insert(triangle_indexes.end(), {1,6,5});
+
+    // light 
+    triangle_indexes.insert(triangle_indexes.end(), {8,10,9});
+    triangle_indexes.insert(triangle_indexes.end(), {8,11,10});
+
+    triangle_indexes.insert(triangle_indexes.end(), {
+    // small box
+    12,13,14,  12,14,15,
+
+    //  (normal +Y)
+    16,18,17,  16,19,18,
+
+    //  -Z
+    12,17,13,  12,16,17,
+
+    //  +Z
+    15,14,18,  15,18,19,
+
+    //  -X
+    12,15,19,  12,19,16,
+
+    //  +X
+    13,17,18,  13,18,14,
+
+    // big box
+    //  (normal -Y)
+    20,21,22,  20,22,23,
+
+    //  (normal +Y)
+    24,26,25,  24,27,26,
+
+    //  -Z
+    20,25,21,  20,24,25,
+
+    //  +Z
+    23,22,26,  23,26,27,
+
+    //  -X
+    20,23,27,  20,27,24,
+
+    //  +X
+    21,25,26,  21,26,22
+    });
+
+    // ======== objects ========
+
+    // floor (white)
+    Object floor;
+    HittableObj hoFloor;
+    floor.n_triangles = 2;
+    floor.i_0 = 0;
+    floor.i_f = 5;
+    hoFloor.Material = DIFUSSE;
+    hoFloor.rgb = {0.8,0.8,0.8};
+    floor.hitObj = hoFloor;
+
+    // ceiling (white)
+    Object ceiling;
+    HittableObj hoCeil;
+    ceiling.n_triangles = 2;
+    ceiling.i_0 = 6;
+    ceiling.i_f = 11;
+    hoCeil.Material = DIFUSSE;
+    hoCeil.rgb = {0.8,0.8,0.8};
+    ceiling.hitObj = hoCeil;
+
+    // back wall (white)
+    Object back;
+    HittableObj hoBack;
+    back.n_triangles = 2;
+    back.i_0 = 12;
+    back.i_f = 17;
+    hoBack.Material = DIFUSSE;
+    hoBack.rgb = {0.8,0.8,0.8};
+    back.hitObj = hoBack;
+
+    // left wall (red)
+    Object left;
+    HittableObj hoLeft;
+    left.n_triangles = 2;
+    left.i_0 = 18;
+    left.i_f = 23;
+    hoLeft.Material = DIFUSSE;
+    hoLeft.rgb = {1,0,0};
+    left.hitObj = hoLeft;
+
+    // right wall (green)
+    Object right;
+    HittableObj hoRight;
+    right.n_triangles = 2;
+    right.i_0 = 24;
+    right.i_f = 29;
+    hoRight.Material = DIFUSSE;
+    hoRight.rgb = {0,1,0};
+    right.hitObj = hoRight;
+
+    // light
+    Object light;
+    HittableObj hoLight;
+    light.n_triangles = 2;
+    light.i_0 = 30;
+    light.i_f = 35;
+    hoLight.Material = EMISSIVE;
+    hoLight.rgb = {1,1,1};
+    light.hitObj = hoLight;
+
+    //small box
+    Object box1;
+    HittableObj hoBox1;
+    box1.n_triangles = 12;
+    box1.i_0 = 36;
+    box1.i_f = 71;
+    hoBox1.Material = DIFUSSE;
+    hoBox1.rgb = {1,1,1};
+    box1.hitObj = hoBox1;
+
+    //big box
+    Object box2;
+    HittableObj hoBox2;
+    box2.n_triangles = 12;
+    box2.i_0 = 72;
+    box2.i_f = 107;
+    hoBox2.Material = DIFUSSE;
+    hoBox2.rgb = {1,1,1};
+    box2.hitObj = hoBox2;
+    
+
+    objects.push_back(floor);
+    objects.push_back(ceiling);
+    objects.push_back(back);
+    objects.push_back(left);
+    objects.push_back(right);
+    objects.push_back(light);
+    objects.push_back(box1);
+    objects.push_back(box2);
+    
     return;
 }
 
@@ -215,7 +433,7 @@ void Movement(GLFWwindow* window){
 }
 
 
-void updateCL(float time) {
+void updateCL(uint32_t cpu_seed) {
     //para mi yo del pasado que no se acuerda que es 
     //cl::Memory es cualquier objeto que vive en memoria de opencl tipo buffer, imagen, buffers de opengl, etc
     try{
@@ -261,7 +479,7 @@ void updateCL(float time) {
         kernel.setArg(6, (int)triangle_points.size());
         kernel.setArg(7, buffer_indexes);
         kernel.setArg(8, (int)triangle_indexes.size());
-        kernel.setArg(9, time);
+        kernel.setArg(9, cpu_seed);
         kernel.setArg(10, camera.getU().toCLF4());
         kernel.setArg(11, camera.getV().toCLF4());
         kernel.setArg(12, camera.getDirection().toCLF4());
@@ -483,9 +701,9 @@ int main() {
 
 
     //Randomizer
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> dist(0.0f, 500.0f);
+    std::random_device rd;  
+    std::mt19937 gen(rd()); // Motor Mersenne Twister
+    std::uniform_int_distribution<uint32_t> dis(0, 4294967295); 
 
     // -------------------------
     // Main loop
@@ -497,12 +715,13 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT);
         Movement(window);
-        float random_value = dist(gen);
+        uint32_t random_value = dis(gen);
         std::cout << camera.getViewportCenter() << std::endl;
-        std::cout << camera.getU() << std::endl;
-        std::cout << camera.getV() << std::endl;
-        std::cout << random_value << std::endl;
+        //std::cout << camera.getU() << std::endl;
         //std::cout << camera.getV() << std::endl;
+        //std::cout << random_value << std::endl;
+        std::cout << sizeof(cl_float3) << std::endl;
+        
         updateCL(random_value);
         renderGL();
         glfwSwapBuffers(window);
